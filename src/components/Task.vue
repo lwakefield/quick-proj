@@ -117,6 +117,23 @@
 </script>
 
 <style>
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .task {
+        width: 32rem;
+        flex: 1 0 auto;
+    }
+    
+    @media (max-width: 450px) {
+        .task {
+            width: 16rem;
+        }
+    }
+    
     .task-list-item {
         display: flex;
         justify-content: space-between;

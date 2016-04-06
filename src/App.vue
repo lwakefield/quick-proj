@@ -1,20 +1,7 @@
 <template>
     <div class="app">
         <header class="app-header">
-            <div class="dropdown select-project" :class="{open: searchProject}">
-                <input type="text" class="form-control" placeholder="Select a project" 
-                    v-model="searchProject" 
-                    @keyup="handleSearchProjectKey($event)">
-                <div class="dropdown-menu">
-                        <a class="dropdown-item" href="#"
-                            v-for="p in filteredSearchProjects"
-                            :class="{active: $index === activeSearchProject}">{{ p.title }}</a>
-                        <a class="dropdown-item" href="#" 
-                                :class="{active: activeSearchProject === filteredSearchProjects.length}">
-                                Create Project <em>{{searchProject}}</em>
-                        </a>
-                </div>
-            </div>
+            <select-add-project :projects="projects"></select-add-project>
         </header>
 
 
@@ -30,12 +17,14 @@
 <script>
     import Project from './components/Project';
     import Task from './components/Task';
+    import SelectAddProject from './components/SelectAddProject';
     import Firebase from 'firebase';
 
     export default {
         components: {
             Project,
-            Task
+            Task,
+            SelectAddProject
         },
         data() {
             return {
@@ -48,45 +37,17 @@
                 ProjectsFireBase: new Firebase('https://vivid-torch-9375.firebaseio.com/projects')
             };
         },
-        computed: {
-            filteredSearchProjects() {
-                return this.projects.filter(p => p.title.includes(this.searchProject));
-            }
-        },
-        methods: {
-            handleSearchProjectKey(event) {
-                if (!this.searchProject) {
-                    this.activeSearchProject = 0;
-                    return;
-                }
-
-                let index = this.activeSearchProject;
-                if (event.keyIdentifier === 'Down') {
-                    index = index === this.filteredSearchProjects.length ? 0 : index + 1;
-                    this.activeSearchProject = index;
-                } else if (event.keyIdentifier === 'Up') {
-                    index = index === 0 ? this.filteredSearchProjects.length : index - 1;
-                    this.activeSearchProject = index;
-                } else if (event.keyIdentifier === 'Enter') {
-                    if (index < this.filteredSearchProjects.length) {
-                        this.project = this.filteredSearchProjects[index];
-                        this.taskPaths = [`/projects/${this.project.id}`];
-                    } else {
-                        this.addProject();
-                    }
-                    this.searchProject = '';
-                }
+        events: {
+            selectProject(projectId) {
+                this.taskPaths = [projectId];
             },
-            addProject() {
-                if (!this.searchProject) return;
+            addProject(projectName) {
+                if (!projectName) return;
 
                 this.ProjectsFireBase.push({
-                    title: this.searchProject
+                    title: projectName
                 });
-                this.searchProject = '';
-            }
-        },
-        events: {
+            },
             selectTask(taskId) {
                 let index = this.taskPaths.findIndex(t => !taskId.includes(t));
                 if (index !== -1) {
@@ -148,31 +109,6 @@
         display: flex;
         justify-content: space-around;
         margin-bottom: 1rem;
-    }
-    
-    .select-project {
-        max-width: 32rem;
-    }
-    
-    .select-project .dropdown-menu {
-        width: 100%;
-    }
-    
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .task {
-        width: 32rem;
-        flex: 1 0 auto;
-    }
-    
-    @media (max-width: 450px) {
-        .task {
-            width: 16rem;
-        }
     }
     
     .card-list {
