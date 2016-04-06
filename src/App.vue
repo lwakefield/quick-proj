@@ -1,24 +1,25 @@
 <template>
     <div class="app">
         <header class="app-header">
-            <form class="add-project-form" @submit.stop.prevent="addProject">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="New Project" v-model="newProject">
-                    <span class="input-group-btn">
-                        <button class="btn btn-primary" type="button" @click="addProject">+</button>
-                    </span>
+            <div class="dropdown select-project" :class="{open: searchProject}">
+                <input type="text" class="form-control" placeholder="Select a project" 
+                    v-model="searchProject" 
+                    @keyup="handleSearchProjectKey($event)">
+                <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#"
+                            v-for="p in filteredSearchProjects"
+                            :class="{active: $index === activeSearchProject}">{{ p.title }}</a>
+                        <a class="dropdown-item" href="#" 
+                                :class="{active: activeSearchProject === filteredSearchProjects.length}">
+                                Create Project <em>{{searchProject}}</em>
+                        </a>
                 </div>
-            </form>
-
-            <select class="form-control" v-model="project">
-                <option v-for="p in projects" v-if="!p.archived" :value="p">{{p.title}}</option>
-            </select>
+            </div>
         </header>
+
 
         <div class="card-list-wrapper" v-el:card-list-wrapper>
             <div class="card-list">
-                <task :task-path=`/projects/${project.id}` v-if="project"></task>
-
                 <task v-for="t in taskPaths" :task-path="t"></task>
             </div>
         </div>
@@ -39,20 +40,50 @@
         data() {
             return {
                 newProject: '',
+                searchProject: '',
+                activeSearchProject: 0,
                 projects: [],
                 project: undefined,
                 taskPaths: [],
                 ProjectsFireBase: new Firebase('https://vivid-torch-9375.firebaseio.com/projects')
             };
         },
+        computed: {
+            filteredSearchProjects() {
+                return this.projects.filter(p => p.title.includes(this.searchProject));
+            }
+        },
         methods: {
+            handleSearchProjectKey(event) {
+                if (!this.searchProject) {
+                    this.activeSearchProject = 0;
+                    return;
+                }
+
+                let index = this.activeSearchProject;
+                if (event.keyIdentifier === 'Down') {
+                    index = index === this.filteredSearchProjects.length ? 0 : index + 1;
+                    this.activeSearchProject = index;
+                } else if (event.keyIdentifier === 'Up') {
+                    index = index === 0 ? this.filteredSearchProjects.length : index - 1;
+                    this.activeSearchProject = index;
+                } else if (event.keyIdentifier === 'Enter') {
+                    if (index < this.filteredSearchProjects.length) {
+                        this.project = this.filteredSearchProjects[index];
+                        this.taskPaths = [`/projects/${this.project.id}`];
+                    } else {
+                        this.addProject();
+                    }
+                    this.searchProject = '';
+                }
+            },
             addProject() {
-                if (!this.newProject) return;
+                if (!this.searchProject) return;
 
                 this.ProjectsFireBase.push({
-                    title: this.newProject
+                    title: this.searchProject
                 });
-                this.newProject = '';
+                this.searchProject = '';
             }
         },
         events: {
@@ -68,6 +99,7 @@
                 });
             },
             deselectTask(taskId) {
+                if (this.taskPaths && this.taskPaths[0] === taskId) return;
                 let index = this.taskPaths.findIndex(t => taskId === t);
                 this.taskPaths.splice(index);
             },
@@ -82,6 +114,7 @@
             let unwatch = this.$watch('projects', newVal => {
                 if (newVal.length) {
                     this.project = newVal[0];
+                    this.taskPaths = [`/projects/${newVal[0].id}`];
                 }
                 unwatch();
             });
@@ -115,6 +148,14 @@
         display: flex;
         justify-content: space-around;
         margin-bottom: 1rem;
+    }
+    
+    .select-project {
+        max-width: 32rem;
+    }
+    
+    .select-project .dropdown-menu {
+        width: 100%;
     }
     
     .card-header {

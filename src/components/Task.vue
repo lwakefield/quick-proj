@@ -66,8 +66,8 @@
         data() {
             return {
                 newTask: '',
-                TaskFireBase: new Firebase(`https://vivid-torch-9375.firebaseio.com/${this.taskPath}/`),
                 task: {},
+                TaskFireBase: new Firebase(`https://vivid-torch-9375.firebaseio.com/${this.taskPath}/`),
                 selectedTask: '',
                 menuOpen: false
             };
