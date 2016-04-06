@@ -6,9 +6,10 @@
         <div class="dropdown-menu">
                 <a class="dropdown-item" href="#"
                     v-for="p in filtered"
-                    :class="{active: $index === index}">{{ p.title }}</a>
+                    :class="{active: $index === index}"
+                    @click.prevent="selectProject(p)">{{ p.title }}</a>
                 <a class="dropdown-item" href="#" 
-                        :class="{active: index === filtered.length}">
+                        :class="{active: index === filtered.length}" @click.prevent="addProject">
                         Create Project <em>{{search}}</em>
                 </a>
         </div>
@@ -54,6 +55,14 @@
                 } else if (event.keyIdentifier === 'U+001B') { // Escape
                     this.search = '';
                 }
+            },
+            addProject() {
+                this.$dispatch('addProject', this.search);
+                this.search = '';
+            },
+            selectProject(project) {
+                this.$dispatch('selectProject', `/projects/${project.id}`);
+                this.search = '';
             }
         }
     };
