@@ -2,8 +2,17 @@
     <div class="app">
         <header class="app-header">
             <select-add-project :projects="projects"></select-add-project>
-        </header>
 
+            <form class="form-inline" v-if="!auth">
+                <input type="text" class="form-control" v-model="user.email" placeholder="email">
+                <input type="password" class="form-control" v-model="user.password" placeholder="password">
+                <button class="btn btn-primary" @click.stop.prevent="register">Signup</button>
+                <button class="btn btn-primary" @click.stop.prevent="login">Login</button>
+            </form>
+            <p v-else>Hey there,
+                <em>{{userName}}</em>
+            </p>
+        </header>
 
         <div class="card-list-wrapper" v-el:card-list-wrapper>
             <div class="card-list">
@@ -19,6 +28,9 @@
     import Task from './components/Task';
     import SelectAddProject from './components/SelectAddProject';
     import Firebase from 'firebase';
+    import {
+        objectGet
+    } from 'jshelpme';
 
     export default {
         components: {
@@ -28,14 +40,56 @@
         },
         data() {
             return {
-                newProject: '',
-                searchProject: '',
-                activeSearchProject: 0,
                 projects: [],
                 project: undefined,
                 taskPaths: [],
-                ProjectsFireBase: new Firebase('https://vivid-torch-9375.firebaseio.com/projects')
+                user: {},
+                auth: {},
+                ProjectsFireBase: undefined,
+                RootFireBase: new Firebase('https://vivid-torch-9375.firebaseio.com/')
             };
+        },
+        computed: {
+            userName() {
+                return objectGet(this.auth, 'password.email');
+            },
+            authId() {
+                return objectGet(this.auth, 'auth.uid', '');
+            }
+        },
+        methods: {
+            updateFireBase() {
+                this.projects = [];
+                if (!this.auth) {
+                    this.ProjectsFireBase = undefined;
+                    return;
+                }
+
+                this.ProjectsFireBase = this.RootFireBase.child(`projects/${this.authId}`);
+                this.fireBaseSyncArray(this.ProjectsFireBase, 'projects');
+                let unwatch = this.$watch('projects', newVal => {
+                    let projId = objectGet(newVal, '0.id', '');
+                    this.taskPaths = [`/projects/${this.authId}/${projId}`];
+                    unwatch();
+                });
+            },
+            register() {
+                this.RootFireBase.createUser(this.user)
+                    .then(userData => {
+                        this.login();
+                    }).catch(error => {
+                        console.log(error);
+                    });
+            },
+            login() {
+                this.RootFireBase.authWithPassword(this.user)
+                    .then(auth => {
+                        this.auth = auth;
+                        this.updateFireBase();
+                    }).catch(error => {
+                        console.log(error);
+                    });
+            }
         },
         events: {
             selectProject(projectId) {
@@ -71,13 +125,12 @@
             }
         },
         ready() {
-            this.fireBaseSyncArray(this.ProjectsFireBase, 'projects');
-            let unwatch = this.$watch('projects', newVal => {
-                if (newVal.length) {
-                    this.project = newVal[0];
-                    this.taskPaths = [`/projects/${newVal[0].id}`];
-                }
-                unwatch();
+            this.RootFireBase.onAuth(auth => {
+                this.auth = auth;
+                this.updateFireBase();
+            });
+            this.RootFireBase.offAuth(auth => {
+                this.auth = {};
             });
         }
     };
