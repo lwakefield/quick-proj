@@ -60,7 +60,7 @@ module.exports = merge(baseWebpackConfig, {
             version: 'v1',
 
             ServiceWorker: {
-                output: '../sw.js'
+                output: 'sw.js'
             }
         })
     ]
