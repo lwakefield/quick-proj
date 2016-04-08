@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import App from './App';
 
+require('offline-plugin/runtime').install();
+
 Vue.config.debug = true;
 
 Vue.mixin({

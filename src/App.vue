@@ -1,7 +1,7 @@
 <template>
     <div class="app">
         <header class="app-header">
-            <select-add-project :projects="projects"></select-add-project>
+            <select-add-project :projects="projects" v-if="auth"></select-add-project>
 
             <form class="form-inline" v-if="!auth">
                 <input type="text" class="form-control" v-model="user.email" placeholder="email">
@@ -9,9 +9,12 @@
                 <button class="btn btn-primary" @click.stop.prevent="register">Signup</button>
                 <button class="btn btn-primary" @click.stop.prevent="login">Login</button>
             </form>
-            <p v-else>Hey there,
-                <em>{{userName}}</em>
-            </p>
+            <div v-else>
+                <span>Hey there,
+                    <em>{{userName}}</em>
+                </span>
+                <a href="#" @click.prevent="logout">Logout</a>
+            </div>
         </header>
 
         <div class="card-list-wrapper" v-el:card-list-wrapper>
@@ -45,8 +48,8 @@
                 taskPaths: [],
                 user: {},
                 auth: {},
-                ProjectsFireBase: undefined,
-                RootFireBase: new Firebase('https://vivid-torch-9375.firebaseio.com/')
+                ProjectsFirebase: undefined,
+                RootFirebase: new Firebase('https://vivid-torch-9375.firebaseio.com/')
             };
         },
         computed: {
@@ -58,15 +61,17 @@
             }
         },
         methods: {
-            updateFireBase() {
+            updateProjectsFirebase() {
                 this.projects = [];
+                this.taskPaths = [];
+                this.project = undefined;
                 if (!this.auth) {
-                    this.ProjectsFireBase = undefined;
+                    this.ProjectsFirebase = undefined;
                     return;
                 }
 
-                this.ProjectsFireBase = this.RootFireBase.child(`projects/${this.authId}`);
-                this.fireBaseSyncArray(this.ProjectsFireBase, 'projects');
+                this.ProjectsFirebase = this.RootFirebase.child(`projects/${this.authId}`);
+                this.fireBaseSyncArray(this.ProjectsFirebase, 'projects');
                 let unwatch = this.$watch('projects', newVal => {
                     let projId = objectGet(newVal, '0.id', '');
                     this.taskPaths = [`/projects/${this.authId}/${projId}`];
@@ -74,7 +79,7 @@
                 });
             },
             register() {
-                this.RootFireBase.createUser(this.user)
+                this.RootFirebase.createUser(this.user)
                     .then(userData => {
                         this.login();
                     }).catch(error => {
@@ -82,13 +87,19 @@
                     });
             },
             login() {
-                this.RootFireBase.authWithPassword(this.user)
+                this.RootFirebase.authWithPassword(this.user)
                     .then(auth => {
                         this.auth = auth;
-                        this.updateFireBase();
+                        this.user = {};
+                        this.updateProjectsFirebase();
                     }).catch(error => {
                         console.log(error);
                     });
+            },
+            logout() {
+                this.RootFirebase.unauth();
+                this.auth = undefined;
+                this.updateProjectsFirebase();
             }
         },
         events: {
@@ -98,7 +109,7 @@
             addProject(projectName) {
                 if (!projectName) return;
 
-                this.ProjectsFireBase.push({
+                this.ProjectsFirebase.push({
                     title: projectName
                 });
             },
@@ -119,18 +130,19 @@
                 this.taskPaths.splice(index);
             },
             archiveProject(project) {
-                this.ProjectsFireBase.child(project.id).update({
+                this.ProjectsFirebase.child(project.id).update({
                     archived: true
                 });
             }
         },
         ready() {
-            this.RootFireBase.onAuth(auth => {
+            this.RootFirebase.onAuth(auth => {
                 this.auth = auth;
-                this.updateFireBase();
+                this.updateProjectsFirebase();
             });
-            this.RootFireBase.offAuth(auth => {
+            this.RootFirebase.offAuth(auth => {
                 this.auth = {};
+                this.updateProjectsFirebase();
             });
         }
     };
@@ -160,7 +172,8 @@
     
     .app-header {
         display: flex;
-        justify-content: space-around;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 1rem;
     }
     
