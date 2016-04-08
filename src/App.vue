@@ -27,7 +27,6 @@
 </template>
 
 <script>
-    import Project from './components/Project';
     import Task from './components/Task';
     import SelectAddProject from './components/SelectAddProject';
     import Firebase from 'firebase';
@@ -37,7 +36,6 @@
 
     export default {
         components: {
-            Project,
             Task,
             SelectAddProject
         },

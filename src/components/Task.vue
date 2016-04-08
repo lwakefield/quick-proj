@@ -30,7 +30,7 @@
 
         <ul class="list-group list-group-flush">
             <li class="task-list-item list-group-item" 
-                v-for="child in task.tasks | orderBy 'priority' -1 order" 
+                v-for="child in task.tasks | orderBy 'priority' -1" 
                 :class="{active: $key === selectedTask}" 
                 @click="selectTask($key)">
                 <div @click.stop>
