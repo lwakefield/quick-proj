@@ -55,7 +55,7 @@ module.exports = merge(baseWebpackConfig, {
         }),
         new OfflinePlugin({
             caches: 'all',
-            scope: '/',
+            scope: '/quick-proj',
             updateStrategy: 'all',
             version: 'v1',
 
