@@ -77,7 +77,7 @@
                     });
                 } else {
                     this.auth = undefined;
-                    this.$unbind('projects');
+                    if (this.$firebaseRefs.projects) this.$unbind('projects');
                     this.taskPaths = [];
                 }
             });
