@@ -1,0 +1,25 @@
+$enable-flex: true;
+$list-group-item-padding-y: 0;
+$list-group-item-padding-x: 0;
+
+@import "~bootstrap/scss/bootstrap.scss";
+
+.list-group-item {
+    @include hover-focus {
+        color: $list-group-link-hover-color;
+        text-decoration: none;
+        background-color: $list-group-hover-bg;
+    }
+}
+
+.pill {
+    background-color: $gray-light;
+    color: $gray-lightest;
+    padding: 0.2rem .6rem;
+    border-radius: 10rem;
+    line-height: 1;
+    font-size: 75%;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: baseline;
+}

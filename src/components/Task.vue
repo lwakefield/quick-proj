@@ -1,57 +1,35 @@
-<template>
-    <div class="card task">
-        <header class="card-header">
-            <span>{{ task.title }}</span> 
-            <button class="btn btn-sm btn-secondary" @click="$dispatch('deselectTask', taskPath)">x</button>
-        </header>
-
-        <div class="card-block">
-            <form @submit.stop.prevent="addTask">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="New Task" v-model="newTask">
-                    <span class="input-group-btn">
-                        <button class="btn btn-primary" type="button" @click="addTask">+</button>
-                    </span>
-                </div>
-            </form>
-        </div>
-
-        <span class="caret"></span>
-        <div class="task-list-options">
-            <div class="dropdown" @click="menuOpen = !menuOpen" :class="{open: menuOpen}">
-                <button class="dropdown-toggle"></button>
-                <div class="dropdown-menu dropdown-menu-right">
-                    <a class="dropdown-item" href="#" 
-                        @click.prevent="deleteSelectedTask" 
-                        :class="{disabled: !selectedTask}">Delete Selected Task</a>
-                </div>
-            </div>
-        </div>
-
-        <ul class="list-group list-group-flush">
-            <li class="task-list-item list-group-item" 
-                v-for="child in task.tasks | orderBy 'priority' -1" 
-                :class="{active: $key === selectedTask}" 
-                @click="selectTask($key)">
-                <div @click.stop>
-                    <select class="task-option" v-model="child.priority" @change="updateTaskPriority($key)">
-                        <option>!!!</option>
-                        <option>!!</option>
-                        <option>!</option>
-                        <option></option>
-                    </select>
-                    <select class="task-option" v-model="child.status" @change="updateTaskStatus($key)">
-                        <option>✔</option>
-                        <option>?</option>
-                        <option></option>
-                    </select>
-                    <span>{{ child.title }}</span>
-                </div>
-                <span class="label label-default label-pill">{{ getTaskCount(child) }}</span>
-            </li>
-        </ul>
-
-    </div>
+<template lang="jade">
+    .card.task
+        header.card-header: .card-header-content
+            span {{ task.title }}
+            button.btn.btn-sm.btn-secondary(@click="$dispatch('deselectTask', taskPath)") x
+        .card-block: form(@submit.stop.prevent="addTask"): .input-group
+            input(type="text", placeholder="New Task", v-model="newTask").form-control
+            span.input-group-btn: button.btn.btn-primary(@click="addTask") +
+        ul.list-group.list-group-flush
+            li.list-group-item(
+                v-for="child in task.tasks | orderBy 'priority' -1",
+                :class="{active: `${this.taskPath}/tasks/${$key}` === selectedTask}"
+            )
+                .task-list-item
+                    div.task-list-item-left(@click.stop="")
+                        select.task-option(v-model="child.priority", @change="updateTaskPriority($key)")
+                            option !!!
+                            option !!
+                            option !
+                            option
+                        select.task-option(v-model="child.status", @change="updateTaskStatus($key)")
+                            option ✔
+                            option ?
+                            option
+                        span.child-task-title - {{ child.title }}
+                    .task-list-item-right
+                        .task-options.dropdown
+                            button(data-toggle="dropdown") &middot;&middot;&middot;
+                            .dropdown-menu.dropdown-menu-right
+                                button.dropdown-item(@click="deleteTask($key)") Delete
+                        span.pill.task-count {{ getTaskCount(child) }}
+                        button.select-task(@click="selectTask($key)") &#10140;
 </template>
 
 <script>
@@ -66,11 +44,15 @@
         data() {
             return {
                 newTask: '',
-                task: {},
-                TaskFireBase: new Firebase(`https://vivid-torch-9375.firebaseio.com/${this.taskPath}/`),
                 selectedTask: '',
                 menuOpen: false
             };
+        },
+        firebase: {
+            root: {
+                source: new Firebase('https://vivid-torch-9375.firebaseio.com'),
+                asObject: true
+            }
         },
         methods: {
             getTaskCount(task) {
@@ -79,45 +61,47 @@
             addTask() {
                 if (!this.newTask) return;
 
-                this.TaskFireBase.child('tasks').push({
+                this.$firebaseRefs.task.child('tasks').push({
                     title: this.newTask.trim(),
                     priority: '',
                     status: ''
                 });
                 this.newTask = '';
             },
-            deleteSelectedTask() {
-                if (!this.selectedTask) return;
-
-                this.TaskFireBase.child(`tasks/${this.selectedTask}`).remove();
-                this.$dispatch('deselectTask', `${this.taskPath}/tasks/${this.selectedTask}`);
-                this.selectedTask = '';
+            deleteTask(taskId) {
+                this.$firebaseRefs.task.child(`tasks/${taskId}`).remove();
             },
             selectTask(taskId) {
                 this.$dispatch('selectTask', `${this.taskPath}/tasks/${taskId}`);
-                this.selectedTask = taskId;
+                this.selectedTask = `${this.taskPath}/tasks/${taskId}`;
             },
             updateTaskPriority(taskId) {
                 let task = this.task.tasks[taskId];
-                this.TaskFireBase.child(`tasks/${taskId}`).update({
+                this.$firebaseRefs.task.child(`tasks/${taskId}`).update({
                     priority: task.priority
                 });
             },
             updateTaskStatus(taskId) {
                 let task = this.task.tasks[taskId];
-                this.TaskFireBase.child(`tasks/${taskId}`).update({
+                this.$firebaseRefs.task.child(`tasks/${taskId}`).update({
                     status: task.status
                 });
             }
         },
-        ready() {
-            this.fireBaseSyncObject(this.TaskFireBase, 'task');
+        events: {
+            deselectTask(taskPath) {
+                if (this.selectedTask === taskPath) this.selectedTask = '';
+            }
+        },
+        created() {
+            let root = this.$firebaseRefs.root;
+            this.$bindAsObject('task', root.child(this.taskPath));
         }
     };
 </script>
 
 <style>
-    .card-header {
+    .card-header-content {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -127,10 +111,13 @@
         width: 32rem;
         flex: 1 0 auto;
     }
+    .task:not(:last-child) {
+        margin-right: 1rem;
+    }
     
     @media (max-width: 450px) {
         .task {
-            width: 16rem;
+            width: calc(100vw - 2rem);
         }
     }
     
@@ -138,6 +125,44 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+    }
+    .select-task {
+        background: none;
+        border: none;
+        border-left: 1px solid LightGrey;
+        padding: 0.5rem;
+    }
+    .select-task:hover {
+        font-weight: bolder;
+    }
+    .select-task:focus {
+        outline: none;
+    }
+    .task-list-item-left {
+        margin-left: 1rem;
+        display: flex;
+    }
+    .child-task-title {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        width: 400px;
+    }
+    .task-list-item-right {
+        display: flex;
+        align-items: center;
+    }
+    .task-options span,
+    .task-count {
+        margin: 0.5rem;
+    }
+    .task-options button {
+        background: none;
+        border: none;
+        padding: 0.5rem;
+    }
+    .task-options button:focus {
+        outline: none;
     }
     
     .task-list-options {
@@ -156,4 +181,5 @@
         border-bottom: 1px solid LightGrey;
         appearance: none;
     }
+
 </style>

@@ -1,33 +1,32 @@
 <template>
     <div class="dropdown select-project" :class="{open: search}">
-        <input type="text" class="form-control" placeholder="Select a project" 
-            v-model="search" 
-            @keyup="handleKey($event)">
+        <input type="text" class="form-control" placeholder="Select a project" v-model="search" @keyup="handleKey($event)">
         <div class="dropdown-menu">
-                <a class="dropdown-item" href="#"
-                    v-for="p in filtered"
-                    :class="{active: $index === index}"
-                    @click.prevent="selectProject(p)">{{ p.title }}</a>
-                <a class="dropdown-item" href="#" 
-                        :class="{active: index === filtered.length}" @click.prevent="addProject">
-                        Create Project <em>{{search}}</em>
-                </a>
+            <a class="dropdown-item" href="#" v-for="p in projects | filterBy search in 'title'" :class="{active: $index === index}" @click.prevent="selectProject(p)">{{ p.title }}</a>
+            <a class="dropdown-item" href="#" :class="{active: newProj}" @click.prevent="addProject">
+                Create Project
+                <em>{{search}}</em>
+            </a>
         </div>
     </div>
 </template>
 
 <script>
+    import Firebase from 'firebase';
+
     export default {
-        props: ['projects'],
         data() {
             return {
                 search: '',
-                index: 0
+                index: 0,
+                newProj: false,
+                auth: undefined
             };
         },
-        computed: {
-            filtered() {
-                return this.projects.filter(p => p.title.includes(this.search));
+        firebase: {
+            root: {
+                source: new Firebase('https://vivid-torch-9375.firebaseio.com/'),
+                asObject: true
             }
         },
         methods: {
@@ -37,33 +36,56 @@
                     return;
                 }
 
-                let index = this.index;
+                let filtered = this.projects.filter(
+                    p => p.title.includes(this.search)
+                );
+
                 if (event.keyIdentifier === 'Down') {
-                    index = index === this.filtered.length ? 0 : index + 1;
-                    this.index = index;
+                    this.index += 1;
+                    if (this.index > filtered.length) this.index = 0;
                 } else if (event.keyIdentifier === 'Up') {
-                    index = index === 0 ? this.filtered.length : index - 1;
-                    this.index = index;
+                    this.index -= 1;
+                    if (this.index === -1) this.index = filtered.length;
                 } else if (event.keyIdentifier === 'Enter') {
-                    if (index < this.filtered.length) {
-                        let project = this.filtered[index];
-                        this.$dispatch('selectProject', `/projects/${project.id}`);
+                    if (this.newProj) {
+                        this.addProject();
                     } else {
-                        this.$dispatch('addProject', this.search);
+                        let project = filtered[this.index];
+                        this.selectProject(project);
                     }
                     this.search = '';
-                } else if (event.keyIdentifier === 'U+001B') { // Escape
+                    this.index = 0;
+                } else if (event.keyIdentifier === 'U+001B') {
                     this.search = '';
+                    this.index = 0;
                 }
+
+                this.newProj = this.index === filtered.length;
             },
             addProject() {
-                this.$dispatch('addProject', this.search);
-                this.search = '';
+                this.$firebaseRefs.projects.push({
+                    title: this.search
+                }).then(snap => {
+                    let key = snap.key();
+                    let auth = this.auth;
+                    this.$dispatch('selectTask', `/projects/${auth.uid}/${key}`);
+                });
             },
             selectProject(project) {
-                this.$dispatch('selectProject', `/projects/${project.id}`);
-                this.search = '';
+                let auth = this.auth;
+                this.$dispatch('selectTask', `/projects/${auth.uid}/${project['.key']}`);
             }
+        },
+        ready() {
+            let root = this.$firebaseRefs.root;
+            root.onAuth(auth => {
+                if (auth) {
+                    this.auth = auth;
+                    this.$bindAsArray('projects', root.child(`/projects/${auth.uid}`));
+                } else {
+                    this.$unbind('projects');
+                }
+            });
         }
     };
 </script>
