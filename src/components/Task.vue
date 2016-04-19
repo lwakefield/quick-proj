@@ -6,19 +6,23 @@
         .card-block: form(@submit.stop.prevent="addTask"): .input-group
             input(type="text", placeholder="New Task", v-model="newTask").form-control
             span.input-group-btn: button.btn.btn-primary(@click="addTask") +
+        .task-list-options
+            .checkbox: label
+                input(type="checkbox", v-model="hideCompleted")
+                | Hide Completed
         ul.list-group.list-group-flush
             li.list-group-item(
-                v-for="child in task.tasks | orderBy 'priority' -1",
-                :class="{active: `${this.taskPath}/tasks/${$key}` === selectedTask}"
+                v-for="child in childTasks | orderBy priorityCompare | filterBy filterCompletedTasks",
+                :class="{active: `${this.taskPath}/tasks/${child['.key']}` === selectedTask}"
             )
                 .task-list-item
                     div.task-list-item-left(@click.stop="")
-                        select.task-option(v-model="child.priority", @change="updateTaskPriority($key)")
+                        select.task-option(v-model="child.priority", @change="updateTaskPriority(child['.key'])")
                             option !!!
                             option !!
                             option !
                             option
-                        select.task-option(v-model="child.status", @change="updateTaskStatus($key)")
+                        select.task-option(v-model="child.status", @change="updateTaskStatus(child['.key'])")
                             option ✔
                             option ?
                             option
@@ -27,9 +31,9 @@
                         .task-options.dropdown
                             button(data-toggle="dropdown") &middot;&middot;&middot;
                             .dropdown-menu.dropdown-menu-right
-                                button.dropdown-item(@click="deleteTask($key)") Delete
+                                button.dropdown-item(@click="deleteTask(child['.key'])") Delete
                         span.pill.task-count {{ getTaskCount(child) }}
-                        button.select-task(@click="selectTask($key)") &#10140;
+                        button.select-task(@click="selectTask(child['.key'])") &#10140;
 </template>
 
 <script>
@@ -45,7 +49,7 @@
             return {
                 newTask: '',
                 selectedTask: '',
-                menuOpen: false
+                hideCompleted: true
             };
         },
         firebase: {
@@ -55,6 +59,12 @@
             }
         },
         methods: {
+            priorityCompare(a, b) {
+                return b.priority.length - a.priority.length;
+            },
+            filterCompletedTasks(a) {
+                return !(this.hideCompleted && a.status === '✔');
+            },
             getTaskCount(task) {
                 return task.tasks ? Object.keys(task.tasks).length : 0;
             },
@@ -96,6 +106,7 @@
         created() {
             let root = this.$firebaseRefs.root;
             this.$bindAsObject('task', root.child(this.taskPath));
+            this.$bindAsArray('childTasks', root.child(`${this.taskPath}/tasks`));
         }
     };
 </script>
@@ -119,6 +130,12 @@
         .task {
             width: calc(100vw - 2rem);
         }
+    }
+
+    .task-list-options {
+        display: flex;
+        justify-content: end;
+        margin: 0 1rem;
     }
     
     .task-list-item {
