@@ -23,3 +23,9 @@ $list-group-item-padding-x: 0;
     text-align: center;
     vertical-align: baseline;
 }
+
+.card-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

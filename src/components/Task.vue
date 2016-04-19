@@ -2,14 +2,22 @@
     .card.task
         header.card-header: .card-header-content
             span {{ task.title }}
-            button.btn.btn-sm.btn-secondary(@click="$dispatch('deselectTask', taskPath)") x
+            .btn-group
+                button.btn.btn-sm.btn-secondary(
+                    v-if="isRoot",
+                    @click="$dispatch('toggleSettings')"
+                ): i.fa.fa-cog
+                button.btn.btn-sm.btn-secondary(@click="$dispatch('deselectTask', taskPath)"): i.fa.fa-times
+
         .card-block: form(@submit.stop.prevent="addTask"): .input-group
             input(type="text", placeholder="New Task", v-model="newTask").form-control
             span.input-group-btn: button.btn.btn-primary(@click="addTask") +
+
         .task-list-options
             .checkbox: label
                 input(type="checkbox", v-model="hideCompleted")
                 | Hide Completed
+
         ul.list-group.list-group-flush
             li.list-group-item(
                 v-for="child in childTasks | orderBy priorityCompare | filterBy filterCompletedTasks",
@@ -29,93 +37,87 @@
                         span.child-task-title - {{ child.title }}
                     .task-list-item-right
                         .task-options.dropdown
-                            button(data-toggle="dropdown") &middot;&middot;&middot;
+                            button(data-toggle="dropdown"): i.fa.fa-ellipsis-v
                             .dropdown-menu.dropdown-menu-right
                                 button.dropdown-item(@click="deleteTask(child)") Delete
                         span.pill.task-count {{ getTaskCount(child) }}
-                        button.select-task(@click="selectTask(child)") &#10140;
+                        button.select-task(@click="selectTask(child)"): i.fa.fa-angle-right
 </template>
 
 <script>
-    import Firebase from 'firebase';
-    import Task from './Task.vue';
-    export default {
-        name: 'task',
-        components: {
-            Task
-        },
-        props: ['taskPath'],
-        data() {
-            return {
-                newTask: '',
-                selectedTask: '',
-                hideCompleted: true
-            };
-        },
-        firebase: {
-            root: {
-                source: new Firebase('https://vivid-torch-9375.firebaseio.com'),
-                asObject: true
-            }
-        },
-        methods: {
-            priorityCompare(a, b) {
-                return b.priority.length - a.priority.length;
-            },
-            filterCompletedTasks(a) {
-                return !(this.hideCompleted && a.status === '✔');
-            },
-            getTaskCount(task) {
-                return task.tasks ? Object.keys(task.tasks).length : 0;
-            },
-            addTask() {
-                if (!this.newTask) return;
-
-                this.$firebaseRefs.task.child('tasks').push({
-                    title: this.newTask.trim(),
-                    priority: '',
-                    status: ''
-                });
-                this.newTask = '';
-            },
-            deleteTask(task) {
-                this.$firebaseRefs.task.child(`tasks/${task['.key']}`).remove();
-            },
-            selectTask(task) {
-                this.$dispatch('selectTask', `${this.taskPath}/tasks/${task['.key']}`);
-                this.selectedTask = `${this.taskPath}/tasks/${task['.key']}`;
-            },
-            updateTaskPriority(task) {
-                this.$firebaseRefs.task.child(`tasks/${task['.key']}`).update({
-                    priority: task.priority
-                });
-            },
-            updateTaskStatus(task) {
-                this.$firebaseRefs.task.child(`tasks/${task['.key']}`).update({
-                    status: task.status
-                });
-            }
-        },
-        events: {
-            deselectTask(taskPath) {
-                if (this.selectedTask === taskPath) this.selectedTask = '';
-            }
-        },
-        created() {
-            let root = this.$firebaseRefs.root;
-            this.$bindAsObject('task', root.child(this.taskPath));
-            this.$bindAsArray('childTasks', root.child(`${this.taskPath}/tasks`));
+import Firebase from 'firebase';
+import Task from './Task.vue';
+export default {
+    name: 'task',
+    components: {
+        Task
+    },
+    props: ['taskPath', 'isRoot'],
+    data() {
+        return {
+            newTask: '',
+            selectedTask: '',
+            hideCompleted: true
+        };
+    },
+    firebase: {
+        root: {
+            source: new Firebase('https://vivid-torch-9375.firebaseio.com'),
+            asObject: true
         }
-    };
+    },
+    methods: {
+        priorityCompare(a, b) {
+            return b.priority.length - a.priority.length;
+        },
+        filterCompletedTasks(a) {
+            return !(this.hideCompleted && a.status === '✔');
+        },
+        getTaskCount(task) {
+            return task.tasks ? Object.keys(task.tasks).length : 0;
+        },
+        addTask() {
+            if (!this.newTask) return;
+
+            this.$firebaseRefs.task.child('tasks').push({
+                title: this.newTask.trim(),
+                priority: '',
+                status: ''
+            });
+            this.newTask = '';
+        },
+        deleteTask(task) {
+            this.$firebaseRefs.task.child(`tasks/${task['.key']}`).remove();
+        },
+        selectTask(task) {
+            this.$dispatch('selectTask', `${this.taskPath}/tasks/${task['.key']}`);
+            this.selectedTask = `${this.taskPath}/tasks/${task['.key']}`;
+        },
+        updateTaskPriority(task) {
+            this.$firebaseRefs.task.child(`tasks/${task['.key']}`).update({
+                priority: task.priority
+            });
+        },
+        updateTaskStatus(task) {
+            this.$firebaseRefs.task.child(`tasks/${task['.key']}`).update({
+                status: task.status
+            });
+        }
+    },
+    events: {
+        deselectTask(taskPath) {
+            if (this.selectedTask === taskPath) this.selectedTask = '';
+        }
+    },
+    created() {
+        let root = this.$firebaseRefs.root;
+        this.$bindAsObject('task', root.child(this.taskPath));
+        this.$bindAsArray('childTasks', root.child(`${this.taskPath}/tasks`));
+    }
+};
 </script>
 
 <style>
-    .card-header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
     .task {
         width: 32rem;
         flex: 1 0 auto;
@@ -156,12 +158,13 @@
     .task-list-item-left {
         margin-left: 1rem;
         display: flex;
+        align-items: center;
     }
     .child-task-title {
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-        width: 400px;
+        /*text-overflow: ellipsis;*/
+        /*white-space: nowrap;*/
+        /*overflow: hidden;*/
+        /*width: 400px;*/
     }
     .task-list-item-right {
         display: flex;

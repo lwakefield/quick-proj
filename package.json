@@ -16,6 +16,7 @@
     "babel-runtime": "^5.8.0",
     "bootstrap": "github:twbs/bootstrap#v4-dev",
     "firebase": "^2.4.2",
+    "font-awesome": "github:fortawesome/Font-Awesome",
     "jade-loader": "^0.8.0",
     "jquery": "^2.2.3",
     "jshelpme": "^1.0.1",
