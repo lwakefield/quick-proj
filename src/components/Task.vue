@@ -7,7 +7,10 @@
                     v-if="isRoot",
                     @click="$dispatch('toggleSettings')"
                 ): i.fa.fa-cog
-                button.btn.btn-sm.btn-secondary(@click="$dispatch('deselectTask', taskPath)"): i.fa.fa-times
+                button.btn.btn-sm.btn-secondary(
+                    v-if="!isRoot"
+                    @click="$dispatch('deselectTask', taskPath)"
+                ): i.fa.fa-times
 
         .card-block: form(@submit.stop.prevent="addTask"): .input-group
             input(type="text", placeholder="New Task", v-model="newTask").form-control
