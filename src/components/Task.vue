@@ -17,12 +17,12 @@
             )
                 .task-list-item
                     div.task-list-item-left(@click.stop="")
-                        select.task-option(v-model="child.priority", @change="updateTaskPriority(child)")
+                        select.task-option(v-model="child.priority", @change.capture="updateTaskPriority(child)")
                             option !!!
                             option !!
                             option !
                             option
-                        select.task-option(v-model="child.status", @change="updateTaskStatus(child)")
+                        select.task-option(v-model="child.status", @change.capture="updateTaskStatus(child)")
                             option ✔
                             option ?
                             option
