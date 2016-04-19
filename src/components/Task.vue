@@ -17,12 +17,12 @@
             )
                 .task-list-item
                     div.task-list-item-left(@click.stop="")
-                        select.task-option(v-model="child.priority", @change="updateTaskPriority(child['.key'])")
+                        select.task-option(v-model="child.priority", @change="updateTaskPriority(child)")
                             option !!!
                             option !!
                             option !
                             option
-                        select.task-option(v-model="child.status", @change="updateTaskStatus(child['.key'])")
+                        select.task-option(v-model="child.status", @change="updateTaskStatus(child)")
                             option ✔
                             option ?
                             option
@@ -31,9 +31,9 @@
                         .task-options.dropdown
                             button(data-toggle="dropdown") &middot;&middot;&middot;
                             .dropdown-menu.dropdown-menu-right
-                                button.dropdown-item(@click="deleteTask(child['.key'])") Delete
+                                button.dropdown-item(@click="deleteTask(child)") Delete
                         span.pill.task-count {{ getTaskCount(child) }}
-                        button.select-task(@click="selectTask(child['.key'])") &#10140;
+                        button.select-task(@click="selectTask(child)") &#10140;
 </template>
 
 <script>
@@ -78,22 +78,20 @@
                 });
                 this.newTask = '';
             },
-            deleteTask(taskId) {
-                this.$firebaseRefs.task.child(`tasks/${taskId}`).remove();
+            deleteTask(task) {
+                this.$firebaseRefs.task.child(`tasks/${task['.key']}`).remove();
             },
-            selectTask(taskId) {
-                this.$dispatch('selectTask', `${this.taskPath}/tasks/${taskId}`);
-                this.selectedTask = `${this.taskPath}/tasks/${taskId}`;
+            selectTask(task) {
+                this.$dispatch('selectTask', `${this.taskPath}/tasks/${task['.key']}`);
+                this.selectedTask = `${this.taskPath}/tasks/${task['.key']}`;
             },
-            updateTaskPriority(taskId) {
-                let task = this.task.tasks[taskId];
-                this.$firebaseRefs.task.child(`tasks/${taskId}`).update({
+            updateTaskPriority(task) {
+                this.$firebaseRefs.task.child(`tasks/${task['.key']}`).update({
                     priority: task.priority
                 });
             },
-            updateTaskStatus(taskId) {
-                let task = this.task.tasks[taskId];
-                this.$firebaseRefs.task.child(`tasks/${taskId}`).update({
+            updateTaskStatus(task) {
+                this.$firebaseRefs.task.child(`tasks/${task['.key']}`).update({
                     status: task.status
                 });
             }
