@@ -142,9 +142,8 @@ export default {
         }
     },
     created() {
-        let root = this.$firebaseRefs.root;
-        this.$bindAsObject('task', root.child(this.taskPath));
-        this.$bindAsArray('childTasks', root.child(`${this.taskPath}/tasks`));
+        this.$bindAsObject('task', this.root.child(this.taskPath));
+        this.$bindAsArray('childTasks', this.root.child(`${this.taskPath}/tasks`));
     }
 };
 </script>
@@ -186,9 +185,10 @@ export default {
         border: none;
         border-left: 1px solid LightGrey;
         padding: 0.5rem;
+        width: 2.5rem;
     }
-    .select-task:hover {
-        font-weight: bolder;
+    .select-task:hover i {
+        transform: scale(1.4);
     }
     .select-task:focus {
         outline: none;
@@ -197,12 +197,6 @@ export default {
         margin-left: 1rem;
         display: flex;
         align-items: center;
-    }
-    .child-task-title {
-        /*text-overflow: ellipsis;*/
-        /*white-space: nowrap;*/
-        /*overflow: hidden;*/
-        /*width: 400px;*/
     }
     .task-list-item-right {
         display: flex;

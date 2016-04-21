@@ -36,7 +36,6 @@ export default {
     data() {
         return {
             taskPaths: [],
-            auth: {},
             showSettings: false
         };
     },
@@ -74,19 +73,14 @@ export default {
         }
     },
     ready() {
-        this.$firebaseRefs.root.onAuth(auth => {
+        this.bindOnAuth('projects', '/projects/<AUTH_ID>');
+
+        this.root.onAuth(auth => {
             if (auth) {
-                let root = this.$firebaseRefs.root;
-                this.$bindAsArray('projects', root.child(`/projects/${auth.uid}`));
-                this.auth = auth;
                 this.$firebaseRefs.projects.once('child_added', snap => {
-                    let key = snap.key();
-                    let auth = this.auth;
-                    this.$dispatch('selectTask', `/projects/${auth.uid}/${key}`);
+                    this.$dispatch('selectTask', `/projects/${this.auth.uid}/${snap.key()}`);
                 });
             } else {
-                this.auth = undefined;
-                if (this.$firebaseRefs.projects) this.$unbind('projects');
                 this.taskPaths = [];
             }
         });

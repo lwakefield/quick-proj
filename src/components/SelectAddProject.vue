@@ -19,8 +19,7 @@
             return {
                 search: '',
                 index: 0,
-                newProj: false,
-                auth: undefined
+                newProj: false
             };
         },
         firebase: {
@@ -77,15 +76,7 @@
             }
         },
         ready() {
-            let root = this.$firebaseRefs.root;
-            root.onAuth(auth => {
-                if (auth) {
-                    this.auth = auth;
-                    this.$bindAsArray('projects', root.child(`/projects/${auth.uid}`));
-                } else if (this.$firebaseRefs.projects) {
-                    this.$unbind('projects');
-                }
-            });
+            this.bindOnAuth('projects', '/projects/<AUTH_ID>');
         }
     };
 </script>
