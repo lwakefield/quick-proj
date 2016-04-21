@@ -17,13 +17,28 @@
             span.input-group-btn: button.btn.btn-primary(@click="addTask") +
 
         .task-list-options
-            .checkbox: label
-                input(type="checkbox", v-model="hideCompleted")
-                | Hide Completed
+
+            span Show Status:&nbsp;
+            .btn-group
+                button.btn.btn-sm.btn-secondary(
+                    v-for="f in statusFilter.types",
+                    :class="{active: statusFilter.active.includes(f)}",
+                    @click="toggleFilter('status', f)"
+                ) {{ f }}
+
+            | &nbsp;
+
+            span Show Priority:&nbsp;
+            .btn-group
+                button.btn.btn-sm.btn-secondary(
+                    v-for="f in priorityFilter.types",
+                    :class="{active: priorityFilter.active.includes(f)}",
+                    @click="toggleFilter('priority', f)"
+                ) {{ f }}
 
         ul.list-group.list-group-flush
             li.list-group-item(
-                v-for="child in childTasks | orderBy priorityCompare | filterBy filterCompletedTasks",
+                v-for="child in childTasks | orderBy orderTasks | filterBy filterTasks",
                 :class="{active: `${this.taskPath}/tasks/${child['.key']}` === selectedTask}"
             )
                 .task-list-item
@@ -60,7 +75,14 @@ export default {
         return {
             newTask: '',
             selectedTask: '',
-            hideCompleted: true
+            priorityFilter: {
+                types: ['!!!', '!!', '!', ''],
+                active: ['!!!', '!!', '!', '']
+            },
+            statusFilter: {
+                types: ['✔', '?', ''],
+                active: ['?', '']
+            }
         };
     },
     firebase: {
@@ -70,11 +92,18 @@ export default {
         }
     },
     methods: {
-        priorityCompare(a, b) {
+        orderTasks(a, b) {
             return b.priority.length - a.priority.length;
         },
-        filterCompletedTasks(a) {
-            return !(this.hideCompleted && a.status === '✔');
+        filterTasks(a) {
+            return this.statusFilter.active.includes(a.status) &&
+                this.priorityFilter.active.includes(a.priority);
+        },
+        toggleFilter(type, val) {
+            let active = this[`${type}Filter`].active;
+            let index = active.indexOf(val);
+            if (index !== -1) active.splice(index, 1);
+            else active.push(val);
         },
         getTaskCount(task) {
             return task.tasks ? Object.keys(task.tasks).length : 0;
@@ -138,7 +167,13 @@ export default {
     .task-list-options {
         display: flex;
         justify-content: end;
-        margin: 0 1rem;
+        align-items: center;
+        margin: 0 1rem 0.5rem;
+    }
+    .task-list-options button:focus,
+    .task-list-options button:active {
+        outline: none;
+        background: none;
     }
     
     .task-list-item {

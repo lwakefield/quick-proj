@@ -24,6 +24,13 @@ $list-group-item-padding-x: 0;
     vertical-align: baseline;
 }
 
+.btn-group {
+    display: flex;
+    .btn {
+        min-width: 1.5rem;
+    }
+}
+
 .card-header-content {
     display: flex;
     justify-content: space-between;
