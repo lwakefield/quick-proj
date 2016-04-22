@@ -44,8 +44,6 @@
                         let project = filtered[this.index];
                         this.selectProject(project);
                     }
-                    this.search = '';
-                    this.index = 0;
                 } else if (event.keyIdentifier === 'U+001B') {
                     this.search = '';
                     this.index = 0;
@@ -60,9 +58,13 @@
                     let key = snap.key();
                     this.$dispatch('selectTask', `/projects/${this.auth.uid}/${key}`);
                 });
+                this.search = '';
+                this.index = 0;
             },
             selectProject(project) {
                 this.$dispatch('selectTask', `/projects/${this.auth.uid}/${project['.key']}`);
+                this.search = '';
+                this.index = 0;
             }
         },
         ready() {
