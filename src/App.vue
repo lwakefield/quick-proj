@@ -12,6 +12,8 @@
                         <i class="fa fa-ellipsis-v"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-right">
+                        <button class="dropdown-item" v-link="{path: '/user'}"> User Settings </button>
+                        <div class="dropdown-divider"></div>
                         <button class="dropdown-item" @click.prevent="logout"> Logout </button>
                     </div>
                 </div>

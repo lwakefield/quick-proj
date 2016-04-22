@@ -66,5 +66,6 @@
     .card-list {
         display: flex;
         flex-flow: row wrap;
+        align-items: center;
     }
 </style>

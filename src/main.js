@@ -63,6 +63,9 @@ router.map({
     },
     '/': {
         component: require('./components/Home')
+    },
+    '/user': {
+        component: require('./components/User')
     }
 });
 router.start(require('./App'), '#app');
