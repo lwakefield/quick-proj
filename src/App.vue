@@ -8,7 +8,14 @@
 
             <login-or-signup v-if="!auth"></login-or-signup>
             <div v-else>
-                <a href="#" @click.prevent="logout">Logout</a>
+                <div class="dropdown">
+                    <button data-toggle="dropdown">
+                        <i class="fa fa-ellipsis-v"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <button class="dropdown-item" @click.prevent="logout"> Logout </button>
+                    </div>
+                </div>
             </div>
         </header>
 

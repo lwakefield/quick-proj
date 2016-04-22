@@ -242,11 +242,6 @@ export default {
         justify-content: flex-end;
     }
     
-    .task-list-options .dropdown-toggle {
-        border: none;
-        background: none;
-    }
-    
     .task-option {
         background: none;
         border: none;

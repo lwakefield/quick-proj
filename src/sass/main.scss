@@ -54,6 +54,11 @@ $font-family-sans-serif: "Quicksand", sans-serif;
         min-width: 1.5rem;
     }
 }
+.dropdown button {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+}
 
 @media (max-width: map-get($grid-breakpoints, 'lg')) {
     .card-block {
