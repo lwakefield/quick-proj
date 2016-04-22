@@ -2,7 +2,7 @@
     <main>
         <header>
             <div class="header-left">
-                <h1><a href="/">Q</a></h1>
+                <h1><a v-link="{path: '/'}">Q</a></h1>
             </div>
 
             <login-or-signup v-if="!auth"></login-or-signup>
@@ -18,32 +18,22 @@
             </div>
         </header>
 
-        <!--<task-list></task-list>-->
         <router-view></router-view>
 
     </main>
 </template>
 
 <script>
-import SelectAddProject from './components/SelectAddProject';
 import LoginOrSignup from './components/LoginOrSignup';
-import TaskList from './components/TaskList';
 
 export default {
     components: {
-        SelectAddProject,
-        LoginOrSignup,
-        TaskList
-    },
-    data() {
-        return {
-            taskPaths: [],
-            showSettings: false
-        };
+        LoginOrSignup
     },
     methods: {
         logout() {
             this.root.unauth();
+            window.location.reload();
         }
     }
 };

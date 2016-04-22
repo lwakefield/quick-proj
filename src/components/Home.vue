@@ -1,5 +1,5 @@
 <template>
-    <div class="card-list">
+    <div class="card-list" v-if="auth">
         <a class="card" v-link="`project/${project['.key']}`" v-for="project in projects">
             <div class="card-block">
                 <h2 class="card-title"> {{ project.title }} </h2>
