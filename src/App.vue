@@ -1,7 +1,10 @@
 <template>
-    <div class="app">
-        <header class="app-header">
-            <select-add-project v-if="auth"></select-add-project>
+    <main>
+        <header>
+            <div class="header-left">
+                <h1>Q</h1>
+                <select-add-project v-if="auth"></select-add-project>
+            </div>
 
             <login-or-signup v-if="!auth"></login-or-signup>
             <div v-else>
@@ -16,7 +19,7 @@
             </div>
         </div>
 
-    </div>
+    </main>
 </template>
 
 <script>
@@ -24,7 +27,6 @@ import Task from './components/Task';
 import SelectAddProject from './components/SelectAddProject';
 import LoginOrSignup from './components/LoginOrSignup';
 import ProjectSettings from './components/ProjectSettings';
-import Firebase from 'firebase';
 
 export default {
     components: {
@@ -39,15 +41,9 @@ export default {
             showSettings: false
         };
     },
-    firebase: {
-        root: {
-            source: new Firebase('https://vivid-torch-9375.firebaseio.com/'),
-            asObject: true
-        }
-    },
     methods: {
         logout() {
-            this.$firebaseRefs.root.unauth();
+            this.root.unauth();
         }
     },
     events: {
@@ -78,7 +74,7 @@ export default {
         this.root.onAuth(auth => {
             if (auth) {
                 this.$firebaseRefs.projects.once('child_added', snap => {
-                    this.$dispatch('selectTask', `/projects/${this.auth.uid}/${snap.key()}`);
+                    this.$dispatch('selectTask', `/projects/${auth.uid}/${snap.key()}`);
                 });
             } else {
                 this.taskPaths = [];
@@ -88,32 +84,24 @@ export default {
 };
 </script>
 
-<style>
-    * {
-        box-sizing: border-box;
-    }
-    
-    ::-webkit-scrollbar {
-        -webkit-appearance: none;
-        width: 4px;
-        height: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        border-radius: 2px;
-        background-color: rgba(0, 0, 0, .5);
-        -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
-    }
-    
-    .app {
+<style scoped>
+    main {
         margin: 1rem;
     }
     
-    .app-header {
+    header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 1rem;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+    }
+    .header-left h1 {
+        margin-right: 1rem;
     }
     
     .card-list {

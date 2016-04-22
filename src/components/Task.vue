@@ -16,7 +16,7 @@
             input(type="text", placeholder="New Task", v-model="newTask").form-control
             span.input-group-btn: button.btn.btn-primary(@click="addTask") +
 
-        .task-list-options
+        .task-list-filters
 
             span Show Status:&nbsp;
             .btn-group
@@ -157,20 +157,20 @@ export default {
         margin-right: 1rem;
     }
     
-    @media (max-width: 450px) {
+    @media (max-width: 1024px) {
         .task {
-            width: calc(100vw - 2rem);
+            width: calc(100vw - 2.5rem);
         }
     }
 
-    .task-list-options {
+    .task-list-filters {
         display: flex;
-        justify-content: end;
+        justify-content: flex-end;
         align-items: center;
-        margin: 0 1rem 0.5rem;
+        margin: 0 1.25rem 0.5rem;
     }
-    .task-list-options button:focus,
-    .task-list-options button:active {
+    .task-list-filters button:focus,
+    .task-list-filters button:active {
         outline: none;
         background: none;
     }

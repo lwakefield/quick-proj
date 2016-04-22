@@ -1,5 +1,5 @@
 <template>
-    <div class="dropdown select-project" :class="{open: search}">
+    <div class="dropdown" :class="{open: search}">
         <input type="text" class="form-control" placeholder="Select a project" v-model="search" @keyup="handleKey($event)">
         <div class="dropdown-menu">
             <a class="dropdown-item" href="#" v-for="p in projects | filterBy search in 'title'" :class="{active: $index === index}" @click.prevent="selectProject(p)">{{ p.title }}</a>
@@ -12,8 +12,6 @@
 </template>
 
 <script>
-    import Firebase from 'firebase';
-
     export default {
         data() {
             return {
@@ -21,12 +19,6 @@
                 index: 0,
                 newProj: false
             };
-        },
-        firebase: {
-            root: {
-                source: new Firebase('https://vivid-torch-9375.firebaseio.com/'),
-                asObject: true
-            }
         },
         methods: {
             handleKey(event) {
@@ -66,13 +58,11 @@
                     title: this.search
                 }).then(snap => {
                     let key = snap.key();
-                    let auth = this.auth;
-                    this.$dispatch('selectTask', `/projects/${auth.uid}/${key}`);
+                    this.$dispatch('selectTask', `/projects/${this.auth.uid}/${key}`);
                 });
             },
             selectProject(project) {
-                let auth = this.auth;
-                this.$dispatch('selectTask', `/projects/${auth.uid}/${project['.key']}`);
+                this.$dispatch('selectTask', `/projects/${this.auth.uid}/${project['.key']}`);
             }
         },
         ready() {
@@ -80,14 +70,3 @@
         }
     };
 </script>
-
-<style>
-    .select-project {
-        width: 100%;
-        max-width: 32rem;
-    }
-    
-    .select-project .dropdown-menu {
-        width: 100%;
-    }
-</style>

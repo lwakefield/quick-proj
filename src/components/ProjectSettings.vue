@@ -23,8 +23,6 @@
 </template>
 
 <script>
-import Firebase from 'firebase';
-
 export default {
     props: ['projectPath'],
     data() {
@@ -32,12 +30,6 @@ export default {
             project: {},
             wantsToDelete: false
         };
-    },
-    firebase: {
-        root: {
-            source: new Firebase('https://vivid-torch-9375.firebaseio.com'),
-            asObject: true
-        }
     },
     methods: {
         update() {
