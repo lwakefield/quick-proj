@@ -19,28 +19,21 @@
             </div>
         </header>
 
-        <div class="card-list-wrapper" v-el:card-list-wrapper v-if="auth">
-            <div class="card-list">
-                <task v-for="t in taskPaths" v-if="!showSettings || $index === 0" :task-path="t" :is-root="$index === 0"></task>
-                <project-settings v-if="showSettings && taskPaths" :project-path="taskPaths[0]"></project-settings>
-            </div>
-        </div>
+        <task-list></task-list>
 
     </main>
 </template>
 
 <script>
-import Task from './components/Task';
 import SelectAddProject from './components/SelectAddProject';
 import LoginOrSignup from './components/LoginOrSignup';
-import ProjectSettings from './components/ProjectSettings';
+import TaskList from './components/TaskList';
 
 export default {
     components: {
-        Task,
         SelectAddProject,
         LoginOrSignup,
-        ProjectSettings
+        TaskList
     },
     data() {
         return {
@@ -52,41 +45,6 @@ export default {
         logout() {
             this.root.unauth();
         }
-    },
-    events: {
-        selectTask(taskPath) {
-            let index = this.taskPaths.findIndex(p => {
-                return !taskPath.includes(p);
-            });
-            if (index !== -1) this.taskPaths.splice(index);
-            this.taskPaths.push(taskPath);
-            this.showSettings = false;
-        },
-        deselectTask(taskPath) {
-            let index = this.taskPaths.findIndex(p => p === taskPath);
-            this.taskPaths.splice(index);
-            this.$broadcast('deselectTask', taskPath);
-        },
-        toggleSettings() {
-            this.showSettings = !this.showSettings;
-        },
-        deletedProject() {
-            this.taskPaths = [];
-            this.showSettings = false;
-        }
-    },
-    ready() {
-        this.bindOnAuth('projects', '/projects/<AUTH_ID>');
-
-        this.root.onAuth(auth => {
-            if (auth) {
-                this.$firebaseRefs.projects.once('child_added', snap => {
-                    this.$dispatch('selectTask', `/projects/${auth.uid}/${snap.key()}`);
-                });
-            } else {
-                this.taskPaths = [];
-            }
-        });
     }
 };
 </script>

@@ -1,6 +1,5 @@
 import Firebase from 'firebase';
 import Vue from 'vue';
-Vue.use(require('vuefire'));
 import App from './App';
 
 window.jQuery = require('jquery');
@@ -8,6 +7,8 @@ require('!bootstrap/dist/js/umd/dropdown.js');
 require('!style!css!sass!./sass/main.scss');
 require('!style!css!font-awesome/css/font-awesome.css');
 
+Vue.use(require('vuefire'));
+Vue.use(require('vue-router'));
 Vue.config.debug = true;
 
 Vue.mixin({
