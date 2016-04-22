@@ -28,7 +28,7 @@
                 }
 
                 let filtered = this.projects.filter(
-                    p => p.title.includes(this.search)
+                    p => p.title.toLowerCase().includes(this.search.toLowerCase())
                 );
 
                 if (event.keyIdentifier === 'Down') {
