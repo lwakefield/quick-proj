@@ -5,14 +5,15 @@ $border-radius: 0;
 $border-radius-lg: 0;
 $border-radius-sm: 0;
 
-@import url(https://fonts.googleapis.com/css?family=Quicksand);
-
-$font-family-sans-serif: "Quicksand", sans-serif;
-
 @import "~bootstrap/scss/bootstrap.scss";
 
 * {
     box-sizing: border-box;
+}
+
+h1 {
+    @import url(https://fonts.googleapis.com/css?family=Quicksand);
+    font-family: "Quicksand", sans-serif;
 }
 
 ::-webkit-scrollbar {

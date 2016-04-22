@@ -51,9 +51,7 @@
                             option ✔
                             option ?
                             option
-                        div.child-task-title
-                            span -
-                            span {{ child.title }}
+                        span {{ child.title }}
                     .task-list-item-right
                         .task-options.dropdown
                             button(data-toggle="dropdown"): i.fa.fa-ellipsis-v
@@ -188,10 +186,6 @@ export default {
         }
     }
     
-    .child-task-title {
-        display: flex;
-        align-items: center;
-    }
     .task-list-item {
         display: flex;
         justify-content: space-between;
