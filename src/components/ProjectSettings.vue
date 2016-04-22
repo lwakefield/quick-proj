@@ -39,12 +39,11 @@ export default {
         },
         delete() {
             this.$firebaseRefs.project.remove();
-            this.$dispatch('deletedProject');
+            this.$route.router.go('/');
         }
     },
     ready() {
-        let root = this.$firebaseRefs.root;
-        this.$bindAsObject('project', root.child(this.projectPath));
+        this.bindObjectOnAuth('project', this.projectPath);
     }
 };
 </script>

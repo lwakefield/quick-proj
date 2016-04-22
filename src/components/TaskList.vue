@@ -19,7 +19,8 @@ export default {
     data() {
         return {
             taskPaths: [],
-            showSettings: false
+            showSettings: false,
+            project: {}
         };
     },
     events: {
@@ -45,17 +46,9 @@ export default {
         }
     },
     ready() {
-        this.bindOnAuth('projects', '/projects/<AUTH_ID>');
-
-        this.root.onAuth(auth => {
-            if (auth) {
-                this.$firebaseRefs.projects.once('child_added', snap => {
-                    this.$dispatch('selectTask', `/projects/${auth.uid}/${snap.key()}`);
-                });
-            } else {
-                this.taskPaths = [];
-            }
-        });
+        let path = `/projects/<AUTH_ID>/${this.$route.params.projectId}`;
+        this.bindObjectOnAuth('project', path);
+        this.taskPaths = [path];
     }
 };
 </script>

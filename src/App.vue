@@ -2,8 +2,7 @@
     <main>
         <header>
             <div class="header-left">
-                <h1>Q</h1>
-                <select-add-project v-if="auth"></select-add-project>
+                <h1><a href="/">Q</a></h1>
             </div>
 
             <login-or-signup v-if="!auth"></login-or-signup>
@@ -19,7 +18,8 @@
             </div>
         </header>
 
-        <task-list></task-list>
+        <!--<task-list></task-list>-->
+        <router-view></router-view>
 
     </main>
 </template>

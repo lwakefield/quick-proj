@@ -62,7 +62,6 @@
 </template>
 
 <script>
-import Firebase from 'firebase';
 import Task from './Task.vue';
 export default {
     name: 'task',
@@ -72,6 +71,7 @@ export default {
     props: ['taskPath', 'isRoot'],
     data() {
         return {
+            task: {},
             newTask: '',
             selectedTask: '',
             priorityFilter: {
@@ -83,12 +83,6 @@ export default {
                 active: ['?', '']
             }
         };
-    },
-    firebase: {
-        root: {
-            source: new Firebase('https://vivid-torch-9375.firebaseio.com'),
-            asObject: true
-        }
     },
     methods: {
         orderTasks(a, b) {
@@ -141,8 +135,8 @@ export default {
         }
     },
     created() {
-        this.$bindAsObject('task', this.root.child(this.taskPath));
-        this.$bindAsArray('childTasks', this.root.child(`${this.taskPath}/tasks`));
+        this.bindObjectOnAuth('task', this.taskPath);
+        this.bindArrayOnAuth('childTasks', `${this.taskPath}/tasks`);
     }
 };
 </script>
