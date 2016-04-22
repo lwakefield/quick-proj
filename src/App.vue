@@ -88,6 +88,11 @@ export default {
     main {
         margin: 1rem;
     }
+    @media (max-width: 992px) {
+        main {
+            margin: 0.25rem;
+        }
+    }
     
     header {
         display: flex;

@@ -13,28 +13,27 @@
                 ): i.fa.fa-times
 
         .card-block: form(@submit.stop.prevent="addTask"): .input-group
-            input(type="text", placeholder="New Task", v-model="newTask").form-control
-            span.input-group-btn: button.btn.btn-primary(@click="addTask") +
+                input(type="text", placeholder="New Task", v-model="newTask").form-control
+                span.input-group-btn: button.btn.btn-primary(@click="addTask") +
 
-        .task-list-filters
+        .task-list-filters(v-if="childTasks.length")
+            .filter
+                span Show Status
+                .btn-group
+                    button.btn.btn-sm.btn-secondary(
+                        v-for="f in statusFilter.types",
+                        :class="{active: statusFilter.active.includes(f)}",
+                        @click="toggleFilter('status', f)"
+                    ) {{ f }}
 
-            span Show Status:&nbsp;
-            .btn-group
-                button.btn.btn-sm.btn-secondary(
-                    v-for="f in statusFilter.types",
-                    :class="{active: statusFilter.active.includes(f)}",
-                    @click="toggleFilter('status', f)"
-                ) {{ f }}
-
-            | &nbsp;
-
-            span Show Priority:&nbsp;
-            .btn-group
-                button.btn.btn-sm.btn-secondary(
-                    v-for="f in priorityFilter.types",
-                    :class="{active: priorityFilter.active.includes(f)}",
-                    @click="toggleFilter('priority', f)"
-                ) {{ f }}
+            .filter
+                span Show Priority
+                .btn-group
+                    button.btn.btn-sm.btn-secondary(
+                        v-for="f in priorityFilter.types",
+                        :class="{active: priorityFilter.active.includes(f)}",
+                        @click="toggleFilter('priority', f)"
+                    ) {{ f }}
 
         ul.list-group.list-group-flush
             li.list-group-item(
@@ -52,7 +51,9 @@
                             option ✔
                             option ?
                             option
-                        span.child-task-title - {{ child.title }}
+                        div.child-task-title
+                            span -
+                            span {{ child.title }}
                     .task-list-item-right
                         .task-options.dropdown
                             button(data-toggle="dropdown"): i.fa.fa-ellipsis-v
@@ -157,7 +158,7 @@ export default {
         margin-right: 1rem;
     }
     
-    @media (max-width: 1024px) {
+    @media (max-width: 992px) {
         .task {
             width: calc(100vw - 2.5rem);
         }
@@ -166,15 +167,31 @@ export default {
     .task-list-filters {
         display: flex;
         justify-content: flex-end;
-        align-items: center;
-        margin: 0 1.25rem 0.5rem;
+        padding: 0.5rem;
     }
     .task-list-filters button:focus,
     .task-list-filters button:active {
         outline: none;
         background: none;
     }
+    .filter {
+        display: flex;
+        flex-flow: row;
+        align-items: center;
+    }
+    @media (max-width: 992px) {
+        .task-list-filters {
+            justify-content: space-around;
+        }
+        .filter {
+            flex-flow: column;
+        }
+    }
     
+    .child-task-title {
+        display: flex;
+        align-items: center;
+    }
     .task-list-item {
         display: flex;
         justify-content: space-between;
@@ -205,6 +222,11 @@ export default {
     .task-options span,
     .task-count {
         margin: 0.5rem;
+    }
+    @media (max-width: 992px) {
+        .task-count {
+            display: none;
+        }
     }
     .task-options button {
         background: none;
